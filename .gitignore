@@ -13,4 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-app/src/main/java/com/bic/byeplug/config/Secret.java
+app/src/main/java/com/bic/byeplug/secret
