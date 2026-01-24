@@ -39,9 +39,7 @@ public class SmartStripAdapter extends RecyclerView.Adapter<SmartStripAdapter.VH
         holder.tvName.setText(item.name);
         holder.tvStatus.setText("Device: " + item.deviceId + " · 상태: " + item.status);
 
-        // ✅ 카드(멀티탭 바) 전체 클릭 → Activity로 콜백
         holder.itemView.setOnClickListener(v -> listener.onDeviceClick(item.deviceId));
-        // 만약 cardRoot id를 쓰고 싶으면:
         // holder.cardRoot.setOnClickListener(v -> listener.onDeviceClick(item.deviceId));
     }
 
@@ -58,7 +56,6 @@ public class SmartStripAdapter extends RecyclerView.Adapter<SmartStripAdapter.VH
             super(itemView);
             tvName = itemView.findViewById(R.id.tvName);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            // item_smart_strip.xml 루트에 android:id="@+id/cardRoot"가 있으면 사용 가능
             cardRoot = itemView.findViewById(R.id.cardRoot);
         }
     }

@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp">
@@ -99,18 +100,20 @@
                 app:layout_constraintVertical_bias="0.18"/>
 
             <!-- 터치 영역(소켓 위에 투명 버튼) -->
+
             <ImageButton
                 android:id="@+id/btnOutlet1"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="outlet1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.21"
-                app:layout_constraintVertical_bias="0.50"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.136"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.578" />
+
 
             <ImageButton
                 android:id="@+id/btnOutlet2"
@@ -118,12 +121,12 @@
                 android:layout_height="56dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="outlet2"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.40"
-                app:layout_constraintVertical_bias="0.50"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.368"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.578" />
 
             <ImageButton
                 android:id="@+id/btnOutlet3"
@@ -131,12 +134,12 @@
                 android:layout_height="56dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="outlet3"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.59"
-                app:layout_constraintVertical_bias="0.50"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.591"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.578" />
 
             <ImageButton
                 android:id="@+id/btnOutlet4"
@@ -144,12 +147,26 @@
                 android:layout_height="56dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="outlet4"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.78"
-                app:layout_constraintVertical_bias="0.50"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.811"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.578" />
+
+
+<!--            <ImageButton-->
+<!--                android:id="@+id/btnOutletAll"-->
+<!--                android:layout_width="40dp"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:background="@android:color/transparent"-->
+<!--                android:contentDescription="outlet all"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.938"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.707" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>

@@ -12,11 +12,7 @@ public class CinRequest {
     }
 
     public static class M2mCin {
-
         public Object con;
-
-        public M2mCin(Object con) {
-            this.con = con;
-        }
+        public M2mCin(Object con) { this.con = con; }
     }
 }
