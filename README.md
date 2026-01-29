@@ -76,35 +76,58 @@
   "ts": 1730000000000
 }
 ```
-## 4. 프로젝트 구조
-```cpp
-com.bic.byeplug
-├── ui
-│   ├── MainActivity
-│   ├── PowerStripDialogFragment
-│   └── SmartStripAdapter
-│
-├── geo
-│   ├── GeofenceManager
-│   ├── GeofenceBroadcastReceiver
-│   ├── AutoOffWorker
-│   ├── HomePrefs
-│   ├── AutoOffPrefs
-│   └── LastStatusPrefs
-│
-├── network
-│   ├── OneM2MService
-│   ├── RetrofitClient
-│   ├── DeviceProvisioner
-│   └── OneM2MHeaders
-│
-├── model
-│   ├── DeviceItem
-│   └── CinRequest
-│
-└── secret
-    └── OneM2MSecret   // API Key, Origin 등 민감 정보 분리
+### 3.2 STATUS (Arduino → Server → App)
+```json
+{
+  "outlets": {
+    "1": true,
+    "2": false,
+    "3": true,
+    "4": false
+  },
+  "ts": 1730000000000
+}
+
 ```
+---
+## 4. 디바이스 구성 및 동작
+### 4.1 하드웨어 구성
+
+MCU: Arduino R4 WiFi
+
+릴레이 모듈: 4채널 5V 릴레이 모듈
+
+전원
+
+Arduino: USB 5V
+
+릴레이: 외부 5V 어댑터 (GND 공통)
+
+부하
+
+220V 가정용 콘센트 4구
+
+활선만 릴레이로 차단
+
+### 4.2 릴레이 제어 방식
+
+콘센트별 독립 릴레이 제어
+
+기본 상태: OFF (Normally Open 사용)
+
+릴레이 제어 핀은 소프트웨어에서 ON/OFF 추상화 처리
+
+릴레이 모듈이 LOW 트리거인 경우를 고려한 설정 옵션 제공
+
+### 4.3 통신 안정성 설계
+
+Arduino R4 WiFi의 TLS 리소스 한계를 고려
+
+STATUS POST와 CONTROL GET은 동일 SSL 소켓을 공유하지 않음
+
+CONTROL 폴링 전에는 STATUS 연결을 명시적으로 종료
+
+---
 ## 5. GPS 자동 차단 동작 흐름
 
 사용자가 집 위치를 등록
@@ -122,6 +145,7 @@ CONTROL 스냅샷 전송
 
 디바이스는 최신 CONTROL만 적용
 
+---
 ## 6. 권한 요구 사항
 ```xml
 android.permission.ACCESS_COARSE_LOCATION
@@ -130,6 +154,7 @@ android.permission.ACCESS_BACKGROUND_LOCATION
 android.permission.INTERNET
 ```
 
+---
 ## 7. 테스트 항목
 
 콘센트 개별 ON / OFF 제어 정상 동작 여부
@@ -142,6 +167,7 @@ CONTROL / STATUS CIN 서버 업로드 확인
 
 앱 종료 상태에서도 자동 차단 동작 여부
 
+---
 ## 8. 개발 환경
 
 Android Studio
