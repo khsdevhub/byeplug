@@ -1,0 +1,52 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="140dp"
+    android:viewportWidth="360"
+    android:viewportHeight="140">
+
+    <!-- body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#E6E6E6"
+        android:strokeWidth="2"
+        android:pathData="M30,20 h270 a20,20 0 0 1 20,20 v60 a20,20 0 0 1 -20,20 h-270 a20,20 0 0 1 -20,-20 v-60 a20,20 0 0 1 20,-20 z"/>
+
+    <!-- sockets (4 big circles) -->
+    <path android:fillColor="#F4F4F4" android:strokeColor="#DDDDDD" android:strokeWidth="2"
+        android:pathData="M70,55 a22,22 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#F4F4F4" android:strokeColor="#DDDDDD" android:strokeWidth="2"
+        android:pathData="M140,55 a22,22 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#F4F4F4" android:strokeColor="#DDDDDD" android:strokeWidth="2"
+        android:pathData="M210,55 a22,22 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#F4F4F4" android:strokeColor="#DDDDDD" android:strokeWidth="2"
+        android:pathData="M280,55 a22,22 0 1,0 0.01,0 z"/>
+
+    <!-- socket inner holes (2 dots each) -->
+    <!-- 1 -->
+    <path android:fillColor="#D9D9D9" android:pathData="M62,70 a3,3 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#D9D9D9" android:pathData="M78,80 a3,3 0 1,0 0.01,0 z"/>
+    <!-- 2 -->
+    <path android:fillColor="#D9D9D9" android:pathData="M132,70 a3,3 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#D9D9D9" android:pathData="M148,80 a3,3 0 1,0 0.01,0 z"/>
+    <!-- 3 -->
+    <path android:fillColor="#D9D9D9" android:pathData="M202,70 a3,3 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#D9D9D9" android:pathData="M218,80 a3,3 0 1,0 0.01,0 z"/>
+    <!-- 4 -->
+    <path android:fillColor="#D9D9D9" android:pathData="M272,70 a3,3 0 1,0 0.01,0 z"/>
+    <path android:fillColor="#D9D9D9" android:pathData="M288,80 a3,3 0 1,0 0.01,0 z"/>
+
+    <!-- cable line -->
+    <path
+        android:strokeColor="#E0E0E0"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M320,85 L358,85"/>
+
+    <!-- right power button circle -->
+    <path
+        android:fillColor="#F4F4F4"
+        android:strokeColor="#DDDDDD"
+        android:strokeWidth="2"
+        android:pathData="M320,85 a12,12 0 1,0 0.01,0 z"/>
+
+</vector>
