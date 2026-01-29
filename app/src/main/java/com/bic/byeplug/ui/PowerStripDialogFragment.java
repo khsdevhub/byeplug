@@ -41,7 +41,7 @@ public class PowerStripDialogFragment extends DialogFragment {
 
     // 폴링 정책
     private static final long POLL_IDLE_MS = 5000; // 평상시 5초
-    private static final long POLL_FAST_MS = 100;  // ⚠️ 0.1초는 트래픽 큼(권장: 500~1000ms)
+    private static final long POLL_FAST_MS = 100;
     private static final long POLL_FAST_WINDOW_MS = 8000; // 8초 동안만 빠르게
 
     public static PowerStripDialogFragment newInstance(String deviceId) {
@@ -91,15 +91,18 @@ public class PowerStripDialogFragment extends DialogFragment {
         api = RetrofitClient.getInstance().create(OneM2MService.class);
 
         View v = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_powerstrip, null);
-
         TextView title = v.findViewById(R.id.tvDeviceTitle);
         if (title != null) title.setText(deviceId);
+
+        b1 = v.findViewById(R.id.btnOutlet1);
+        b2 = v.findViewById(R.id.btnOutlet2);
+        b3 = v.findViewById(R.id.btnOutlet3);
+        b4 = v.findViewById(R.id.btnOutlet4);
 
         b1.setOnLongClickListener(vw -> { toggleAutoOff(1); return true; });
         b2.setOnLongClickListener(vw -> { toggleAutoOff(2); return true; });
         b3.setOnLongClickListener(vw -> { toggleAutoOff(3); return true; });
         b4.setOnLongClickListener(vw -> { toggleAutoOff(4); return true; });
-
 
         if (b1 == null || b2 == null || b3 == null || b4 == null) {
             throw new IllegalStateException("dialog_powerstrip.xml에 btnOutlet1~4 id가 필요합니다.");

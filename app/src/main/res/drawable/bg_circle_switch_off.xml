@@ -1,4 +1,24 @@
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-    <solid android:color="#EFEFEF"/>
-    <stroke android:width="1dp" android:color="#D0D0D0"/>
-</shape>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="50"
+    android:viewportHeight="50">
+
+    <!-- 꽉 채운 큰 원 -->
+    <path
+        android:fillColor="#F4F4F4"
+        android:strokeColor="#999999"
+        android:strokeWidth="2"
+        android:pathData="M25,25 m -23,0 a 23,23 0 1,0 46,0 a 23,23 0 1,0 -46,0"/>
+
+
+    <!-- 작은 내부 원 1: 반지름 2 -->
+    <path
+        android:fillColor="#D9D9D9"
+        android:pathData="M18,20 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0"/>
+
+    <!-- 작은 내부 원 2: 반지름 2 -->
+    <path
+        android:fillColor="#D9D9D9"
+        android:pathData="M31,32 m -3,0 a 3,3 0 1,0 6,0 a 3,3 0 1,0 -6,0"/>
+</vector>
