@@ -22,7 +22,9 @@ import com.bic.byeplug.network.DeviceProvisioner;
 import com.bic.byeplug.network.OneM2MHeaders;
 import com.bic.byeplug.network.OneM2MService;
 import com.bic.byeplug.network.RetrofitClient;
-import com.bic.byeplug.secret.OneM2MSecret;
+import com.bic.byeplug.geo.AutoOffPrefs;
+import com.bic.byeplug.geo.LastStatusPrefs;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,10 +37,11 @@ public class PowerStripDialogFragment extends DialogFragment {
 
     private static final String TAG = "PowerStripDialog";
     private static final String ARG_DEVICE_ID = "deviceId";
+    private static final String CSE = "Mobius";
 
     // 폴링 정책
     private static final long POLL_IDLE_MS = 5000; // 평상시 5초
-    private static final long POLL_FAST_MS = 1000; // 조작 직후 1초
+    private static final long POLL_FAST_MS = 100;  // ⚠️ 0.1초는 트래픽 큼(권장: 500~1000ms)
     private static final long POLL_FAST_WINDOW_MS = 8000; // 8초 동안만 빠르게
 
     public static PowerStripDialogFragment newInstance(String deviceId) {
@@ -67,10 +70,21 @@ public class PowerStripDialogFragment extends DialogFragment {
             handler.postDelayed(this, currentPollMs);
         }
     };
+    private void toggleAutoOff(int outlet) {
+        int mask = AutoOffPrefs.getMask(requireContext(), deviceId);
+        int next = AutoOffPrefs.toggleOutlet(mask, outlet);
+        AutoOffPrefs.setMask(requireContext(), deviceId, next);
+
+        boolean selected = AutoOffPrefs.isSelected(next, outlet);
+        Toast.makeText(requireContext(),
+                "집 밖 자동OFF: " + outlet + "번 " + (selected ? "선택됨" : "해제됨"),
+                Toast.LENGTH_SHORT).show();
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
         deviceId = (getArguments() != null) ? getArguments().getString(ARG_DEVICE_ID) : null;
         if (deviceId == null) deviceId = "UNKNOWN";
 
@@ -81,10 +95,11 @@ public class PowerStripDialogFragment extends DialogFragment {
         TextView title = v.findViewById(R.id.tvDeviceTitle);
         if (title != null) title.setText(deviceId);
 
-        b1 = v.findViewById(R.id.btnOutlet1);
-        b2 = v.findViewById(R.id.btnOutlet2);
-        b3 = v.findViewById(R.id.btnOutlet3);
-        b4 = v.findViewById(R.id.btnOutlet4);
+        b1.setOnLongClickListener(vw -> { toggleAutoOff(1); return true; });
+        b2.setOnLongClickListener(vw -> { toggleAutoOff(2); return true; });
+        b3.setOnLongClickListener(vw -> { toggleAutoOff(3); return true; });
+        b4.setOnLongClickListener(vw -> { toggleAutoOff(4); return true; });
+
 
         if (b1 == null || b2 == null || b3 == null || b4 == null) {
             throw new IllegalStateException("dialog_powerstrip.xml에 btnOutlet1~4 id가 필요합니다.");
@@ -109,7 +124,6 @@ public class PowerStripDialogFragment extends DialogFragment {
             isReady = true;
             handler.post(() -> {
                 setButtonsEnabled(true);
-                // 첫 동기화 + 폴링 시작
                 startPolling(POLL_IDLE_MS);
                 fetchStatusAndApply();
             });
@@ -135,49 +149,61 @@ public class PowerStripDialogFragment extends DialogFragment {
         // 조작 직후 폴링 버스트
         boostPollingTemporarily();
 
-        boolean prev = state[outlet];
-        boolean next = !prev;
+        boolean[] rollbackSnapshot = snapshotState();
 
         // 1) UI 즉시 토글(낙관적)
-        state[outlet] = next;
+        state[outlet] = !state[outlet];
         refreshButtons();
 
-        // 2) CONTROL 전송, 실패하면 롤백
-        sendControl(outlet, next, prev);
+        // 2) CONTROL 전송 (항상 4구 전체 스냅샷)
+        sendControlSnapshot(rollbackSnapshot);
     }
 
-    private void sendControl(int outlet, boolean isOn, boolean rollbackTo) {
+    private boolean[] snapshotState() {
+        boolean[] snap = new boolean[5];
+        for (int i = 1; i <= 4; i++) snap[i] = state[i];
+        return snap;
+    }
+
+    private void sendControlSnapshot(boolean[] rollbackSnapshot) {
         Map<String, Object> con = new HashMap<>();
-        con.put("outlet", outlet);
-        con.put("isOn", isOn);
+        con.put("cmd", "SET_OUTLETS");
+
+        Map<String, Object> outlets = new HashMap<>();
+        outlets.put("1", state[1]);
+        outlets.put("2", state[2]);
+        outlets.put("3", state[3]);
+        outlets.put("4", state[4]);
+
+        con.put("outlets", outlets);
+        con.put("ts", System.currentTimeMillis());
 
         CinRequest body = new CinRequest(con);
 
         api.postControl(
-                "Mobius",
+                CSE,
                 deviceId,
                 "CONTROL",
-                OneM2MHeaders.withTy(4), // Content-Type: application/json;ty=4 포함
+                OneM2MHeaders.withTy(4),
                 body
         ).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "CONTROL failed HTTP=" + response.code());
-                    state[outlet] = rollbackTo;
+                    Log.e(TAG, "CONTROL(snapshot) failed HTTP=" + response.code());
+                    for (int i = 1; i <= 4; i++) state[i] = rollbackSnapshot[i];
                     refreshButtons();
                     Toast.makeText(requireContext(), "제어 실패 (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // 성공해도, 실제 확정은 STATUS가 해줌 → 바로 한번 당겨서 확인
                 fetchStatusAndApply();
             }
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(TAG, "CONTROL network error", t);
-                state[outlet] = rollbackTo;
+                Log.e(TAG, "CONTROL(snapshot) network error", t);
+                for (int i = 1; i <= 4; i++) state[i] = rollbackSnapshot[i];
                 refreshButtons();
                 Toast.makeText(requireContext(), "네트워크 오류", Toast.LENGTH_SHORT).show();
             }
@@ -189,7 +215,7 @@ public class PowerStripDialogFragment extends DialogFragment {
     // =========================
     private void fetchStatusAndApply() {
         api.getLatestCin(
-                "Mobius",
+                CSE,
                 deviceId,
                 "STATUS",
                 OneM2MHeaders.base()
@@ -199,7 +225,6 @@ public class PowerStripDialogFragment extends DialogFragment {
                 if (!response.isSuccessful() || response.body() == null) return;
 
                 try {
-                    // Gson이 Map 구조로 내려주는 경우가 많음(LinkedTreeMap)
                     @SuppressWarnings("unchecked")
                     Map<String, Object> root = (Map<String, Object>) response.body();
 
@@ -215,7 +240,6 @@ public class PowerStripDialogFragment extends DialogFragment {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> con = (Map<String, Object>) conObj;
 
-                    // ✅ 약속한 포맷: { outlets: { "1": true, ... } }
                     Object outletsObj = con.get("outlets");
                     if (!(outletsObj instanceof Map)) return;
 
@@ -225,14 +249,12 @@ public class PowerStripDialogFragment extends DialogFragment {
                     applyOutletStateFromMap(outlets);
 
                 } catch (Exception e) {
-                    // 아두이노 포맷이 아직 변하는 중이면 조용히 무시
                     Log.w(TAG, "STATUS parse fail: " + e.getMessage());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                // 폴링 실패는 조용히 (필요하면 로그/토스트)
                 Log.w(TAG, "STATUS poll fail: " + t.getMessage());
             }
         });
@@ -244,6 +266,8 @@ public class PowerStripDialogFragment extends DialogFragment {
             state[i] = toBoolean(v, state[i]);
         }
         refreshButtons();
+
+        LastStatusPrefs.save(requireContext(), deviceId, state[1], state[2], state[3], state[4]);
     }
 
     private boolean toBoolean(Object v, boolean fallback) {
@@ -273,12 +297,10 @@ public class PowerStripDialogFragment extends DialogFragment {
     }
 
     private void boostPollingTemporarily() {
-        // 빠른 폴링으로 전환
         currentPollMs = POLL_FAST_MS;
         handler.removeCallbacks(pollTask);
         handler.post(pollTask);
 
-        // 8초 뒤 원복 (중복 예약 방지 위해 한번 더 remove)
         handler.removeCallbacks(resetPollRunnable);
         handler.postDelayed(resetPollRunnable, POLL_FAST_WINDOW_MS);
     }
@@ -310,8 +332,6 @@ public class PowerStripDialogFragment extends DialogFragment {
     }
 
     private void setBtnState(ImageButton btn, boolean isOn) {
-        // 네가 만든 drawable이 있으면 사용
-        // 없으면 alpha만으로도 구분 가능
         try {
             if (isOn) {
                 btn.setBackgroundResource(R.drawable.bg_circle_switch_on);
@@ -319,7 +339,6 @@ public class PowerStripDialogFragment extends DialogFragment {
                 btn.setBackgroundResource(R.drawable.bg_circle_switch_off);
             }
         } catch (Exception ignored) {
-            // drawable 없을 때 대비
             btn.setBackgroundColor(0x00000000);
         }
     }
