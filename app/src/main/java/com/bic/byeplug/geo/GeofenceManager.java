@@ -23,14 +23,23 @@ public class GeofenceManager {
 
     public PendingIntent geofencePendingIntent() {
         Intent intent = new Intent(appContext, GeofenceBroadcastReceiver.class);
+
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        // Android 12(API 31)+: 반드시 MUTABLE/IMMUTABLE 중 하나 명시 필요
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            flags |= PendingIntent.FLAG_MUTABLE;
+        }
+
         return PendingIntent.getBroadcast(
                 appContext,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                flags
         );
+
     }
 
+    // GeofenceManager.java
     public void registerHomeGeofence() {
         double lat = HomePrefs.lat(appContext);
         double lng = HomePrefs.lng(appContext);
@@ -39,17 +48,20 @@ public class GeofenceManager {
         Geofence geofence = new Geofence.Builder()
                 .setRequestId(GEOFENCE_ID_HOME)
                 .setCircularRegion(lat, lng, radius)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT) // 집 밖으로 나갈 때
+                .setTransitionTypes(
+                        Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_ENTER
+                )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
 
         GeofencingRequest req = new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
-                .addGeofences(Collections.singletonList(geofence))
+                .setInitialTrigger(0)
+                .addGeofence(geofence)
                 .build();
 
-        // 권한(FINE + BACKGROUND) 전제
-        client.addGeofences(req, geofencePendingIntent());
+        client.addGeofences(req, geofencePendingIntent())
+                .addOnSuccessListener(unused -> android.util.Log.d("GEO", "Geofence registered OK"))
+                .addOnFailureListener(e -> android.util.Log.e("GEO", "Geofence register FAIL: " + e));
     }
 
     public void unregisterHomeGeofence() {
